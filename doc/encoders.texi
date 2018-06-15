@@ -992,6 +992,20 @@ If set to 0, disables the use of phase inversion for intensity stereo,
 improving the quality of mono downmixes, but slightly reducing normal stereo
 quality. The default is 1 (phase inversion enabled).
 
+@item signal (@emph{music} and @emph{speech})
+Set signal type. This option acts as a tuning bias for low bitrates encoding.
+Valid options are listed below:
+
+@table @samp
+@item auto (N.A.)
+No bias, automatic signal type detection (the default).
+
+@item voice (@emph{speech})
+Bias thresholds towards choosing LPC or Hybrid modes.
+
+@item music (@emph{music})
+Bias thresholds towards choosing MDCT modes.
+@end table
 @end table
 
 @anchor{libshine}

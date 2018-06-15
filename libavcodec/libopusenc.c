@@ -43,6 +43,7 @@ typedef struct LibopusEncOpts {
 #ifdef OPUS_SET_PHASE_INVERSION_DISABLED_REQUEST
     int apply_phase_inv;
 #endif
+    int signal_type;
 } LibopusEncOpts;
 
 typedef struct LibopusEncContext {
@@ -173,6 +174,12 @@ static int libopus_configure_encoder(AVCodecContext *avctx, OpusMSEncoder *enc,
                "Unable to set phase inversion: %s\n",
                opus_strerror(ret));
 #endif
+    ret = opus_multistream_encoder_ctl(enc,
+                                       OPUS_SET_SIGNAL(opts->signal_type));
+    if (ret != OPUS_OK)
+        av_log(avctx, AV_LOG_WARNING,
+               "Unable to set signal type: %s\n", opus_strerror(ret));
+
     return OPUS_OK;
 }
 
@@ -561,6 +568,10 @@ static const AVOption libopus_options[] = {
 #ifdef OPUS_SET_PHASE_INVERSION_DISABLED_REQUEST
     { "apply_phase_inv", "Apply intensity stereo phase inversion", OFFSET(apply_phase_inv), AV_OPT_TYPE_BOOL, { .i64 = 1 }, 0, 1, FLAGS },
 #endif
+    { "signal",         "Signal type",                         OFFSET(signal_type),    AV_OPT_TYPE_INT,   { .i64 = OPUS_AUTO }, OPUS_AUTO, OPUS_SIGNAL_MUSIC, FLAGS, "signal" },
+        { "auto",           "Automatic detection", 0, AV_OPT_TYPE_CONST, { .i64 = OPUS_AUTO },         0, 0, FLAGS, "signal" },
+        { "voice",          "Tune for speech",     0, AV_OPT_TYPE_CONST, { .i64 = OPUS_SIGNAL_VOICE }, 0, 0, FLAGS, "signal" },
+        { "music",          "Tune for music",      0, AV_OPT_TYPE_CONST, { .i64 = OPUS_SIGNAL_MUSIC }, 0, 0, FLAGS, "signal" },
     { NULL },
 };
 
