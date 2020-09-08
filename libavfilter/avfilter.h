@@ -425,6 +425,17 @@ struct AVFilterContext {
      * configured.
      */
     int extra_hw_frames;
+
+     /**
+     * Output sample rate fallback method when no exact match found in the next
+     * filter's available input sample rates.
+     */
+    enum {
+        AVOSRFB_CLOSEST = 0,   ///< to the closest one, regardless of higher or lower
+        AVOSRFB_HIGHER,        ///< to the closest higher one
+        AVOSRFB_TWICE_HIGHER,  ///< to the closest twice higher one
+        AVOSRFB_HIGHEST,       ///< to the highest one
+    } osr_fallback_method;
 };
 
 /**

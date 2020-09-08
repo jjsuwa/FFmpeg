@@ -868,7 +868,32 @@ static void swap_samplerates_on_filter(AVFilterContext *filter)
             continue;
 
         for (j = 0; j < outlink->incfg.samplerates->nb_formats; j++) {
-            int diff = abs(sample_rate - outlink->incfg.samplerates->formats[j]);
+            int diff;
+            switch(filter->osr_fallback_method) {
+            case AVOSRFB_CLOSEST:
+                diff = abs(sample_rate - outlink->incfg.samplerates->formats[j]);
+                break;
+            case AVOSRFB_HIGHER:
+                if ((diff = outlink->incfg.samplerates->formats[j] - sample_rate) >= 0)
+                    break;
+                diff = INT_MAX - outlink->incfg.samplerates->formats[j];
+                break;
+            case AVOSRFB_TWICE_HIGHER:
+                if ((diff = outlink->incfg.samplerates->formats[j] - sample_rate) == 0)
+                    break;
+                if ((diff = outlink->incfg.samplerates->formats[j] - sample_rate * 2) >= 0)
+                    break;
+                diff = INT_MAX - outlink->incfg.samplerates->formats[j];
+                break;
+            case AVOSRFB_HIGHEST:
+                if ((diff = outlink->incfg.samplerates->formats[j] - sample_rate) == 0)
+                    break;
+                diff = INT_MAX - outlink->incfg.samplerates->formats[j];
+                break;
+            default:
+                av_assert0(0);  // enum out of range
+                break;
+            }
 
             av_assert0(diff < INT_MAX); // This would lead to the use of uninitialized best_diff but is only possible with invalid sample rates
 
